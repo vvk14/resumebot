@@ -1,70 +1,71 @@
-    const chatBox = document.getElementById("chatBox");
-    const chatInput = document.getElementById("chatInput");
-    let visitorName = "";
+let visitorName = "";
 
-    function startChat() {
-      const name = document.getElementById("visitorName").value.trim();
-      const email = document.getElementById("visitorEmail").value.trim();
+function startChat() {
+  const name = $.trim($("#visitorName").val());
+  const email = $.trim($("#visitorEmail").val());
 
-      if (!name || !email) {
-        alert("Please enter both name and email.");
-        return;
-      }
+  if (!name || !email) {
+    alert("Please enter both name and email.");
+    return;
+  }
 
-      visitorName = name;
-      document.getElementById("introForm").style.display = "none";
-      document.getElementById("userLabel").textContent = visitorName;
+  visitorName = name;
+  $("#introForm").hide();
+  $("#userLabel").text(visitorName);
 
-      setTimeout(() => {
-        addMessage("bot", `Hi ${visitorName}! 👋 Welcome to Vivek’s interactive resume.`);
-        setTimeout(() => {
-          addMessage("bot", "What would you like to know? Type /skills, /experience, or /projects.");
-        }, 800);
-      }, 400);
-    }
+  setTimeout(() => {
+    addMessage("bot", `Hi ${visitorName}! 👋 Welcome to Vivek’s interactive resume.`);
+    setTimeout(() => {
+      addMessage("bot", "What would you like to know? Type /skills, /experience, or /projects.");
+    }, 800);
+  }, 400);
+}
 
-    function sendMessage() {
-      const msg = chatInput.value.trim();
-      if (!msg) return;
-      addMessage("user", msg);
-      chatInput.value = "";
-      showTyping();
-      setTimeout(() => {
-        handleCommand(msg.toLowerCase());
-        hideTyping();
-      }, 1000);
-    }
+function sendMessage() {
+  const msg = $.trim($("#chatInput").val());
+  if (!msg) return;
 
-    function addMessage(sender, text) {
-      const msg = document.createElement("div");
-      msg.className = `message ${sender}`;
-      msg.innerHTML = text;
-      chatBox.appendChild(msg);
-      chatBox.scrollTop = chatBox.scrollHeight;
-    }
+  addMessage("user", msg);
+  $("#chatInput").val("");
+  showTyping();
 
-    function showTyping() {
-      const typing = document.createElement("div");
-      typing.className = "message bot typing-indicator";
-      typing.id = "typing";
-      typing.textContent = "Vivek is typing...";
-      chatBox.appendChild(typing);
-      chatBox.scrollTop = chatBox.scrollHeight;
-    }
+  setTimeout(() => {
+    handleCommand(msg.toLowerCase());
+    hideTyping();
+  }, 1000);
+}
 
-    function hideTyping() {
-      const typing = document.getElementById("typing");
-      if (typing) typing.remove();
-    }
+function addMessage(sender, text) {
+  const msg = $("<div></div>")
+    .addClass("message " + sender)
+    .html(text);
 
-    function handleCommand(cmd) {
-      if (cmd.includes("/skills")) {
-        addMessage("bot", `<strong>My Skills:</strong><br>• HTML, CSS, JavaScript<br>• React, Shopify (Liquid), Node.js<br>• UI/UX Design, Web Performance`);
-      } else if (cmd.includes("/experience")) {
-        addMessage("bot", `<strong>Experience:</strong><br>• Frontend Dev at XYZ (2+ years)<br>• Shopify custom themes and apps<br>• Performance optimization`);
-      } else if (cmd.includes("/projects")) {
-        addMessage("bot", `<strong>Projects:</strong><br>🔹 <a href="#">Custom Shopify Bundle App</a><br>🔹 <a href="#">Portfolio Website</a><br>🔹 <a href="#">Analytics Dashboard</a>`);
-      } else {
-        addMessage("bot", "🤖 I didn’t get that. Try /skills, /experience or /projects.");
-      }
-    }
+  $("#chatBox").append(msg);
+  $("#chatBox").scrollTop($("#chatBox")[0].scrollHeight);
+}
+
+function showTyping() {
+  const typing = $("<div></div>")
+    .addClass("message bot typing-indicator")
+    .attr("id", "typing")
+    .text("Vivek is typing...");
+
+  $("#chatBox").append(typing);
+  $("#chatBox").scrollTop($("#chatBox")[0].scrollHeight);
+}
+
+function hideTyping() {
+  $("#typing").remove();
+}
+
+function handleCommand(cmd) {
+  if (cmd.includes("/skills")) {
+    addMessage("bot", `<strong>My Skills:</strong><br>• HTML, CSS, JavaScript<br>• React, Shopify (Liquid), Node.js<br>• UI/UX Design, Web Performance`);
+  } else if (cmd.includes("/experience")) {
+    addMessage("bot", `<strong>Experience:</strong><br>• Frontend Dev at XYZ (2+ years)<br>• Shopify custom themes and apps<br>• Performance optimization`);
+  } else if (cmd.includes("/projects")) {
+    addMessage("bot", `<strong>Projects:</strong><br>🔹 <a href="#">Custom Shopify Bundle App</a><br>🔹 <a href="#">Portfolio Website</a><br>🔹 <a href="#">Analytics Dashboard</a>`);
+  } else {
+    addMessage("bot", "🤖 I didn’t get that. Try /skills, /experience or /projects.");
+  }
+}
