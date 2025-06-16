@@ -36,19 +36,29 @@ function sendMessage() {
 }
 
 function addMessage(sender, text) {
-  const msg = $("<div></div>")
-    .addClass("message " + sender)
-    .html(text);
+  const time = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+
+  const msg = $(`
+    <div class="message-container">
+      <div class="message ${sender}">
+        <div class="message-content">
+          <div class="text">${text}</div>
+        </div>
+      </div>
+      <div class="timestamp">${time}</div>
+    </div>
+  `);
 
   $("#chatBox").append(msg);
   $("#chatBox").scrollTop($("#chatBox")[0].scrollHeight);
 }
 
 function showTyping() {
-  const typing = $("<div></div>")
-    .addClass("message bot typing-indicator")
-    .attr("id", "typing")
-    .text("Vivek is typing...");
+  const typing = $(`
+    <div class="message bot typing-indicator" id="typing">
+      Vivek is typing<span class="dot">.</span><span class="dot">.</span><span class="dot">.</span>
+    </div>
+  `);
 
   $("#chatBox").append(typing);
   $("#chatBox").scrollTop($("#chatBox")[0].scrollHeight);
