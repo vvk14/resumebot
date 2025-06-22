@@ -13,7 +13,7 @@ app.use(cors());
 app.use(express.json());
 
 // 🔑 Your OpenRouter API Key
-const OPENROUTER_API_KEY = "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";
+const OPENROUTER_API_KEY = "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";
 
 // 🧠 Load resume data from JSON
 const resume = JSON.parse(fs.readFileSync(path.join(__dirname, "resumeData.json"), "utf-8"));

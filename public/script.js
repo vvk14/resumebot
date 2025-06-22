@@ -1,3 +1,6 @@
+let visitorName = "";
+
+// Levenshtein & fuzzy match (kept for future use if needed)
 function isSimilar(input, keywords, threshold = 2) {
   input = input.toLowerCase();
   return keywords.some(keyword => {
@@ -25,8 +28,6 @@ function levenshtein(a, b) {
   return matrix[bl][al];
 }
 
-let visitorName = "";
-
 function startChat() {
   const name = $.trim($("#visitorName").val());
   const email = $.trim($("#visitorEmail").val());
@@ -43,7 +44,7 @@ function startChat() {
   setTimeout(() => {
     addMessage("bot", `Hi ${visitorName}! 👋 Welcome to Vivek’s interactive resume.`);
     setTimeout(() => {
-      addMessage("bot", "What would you like to know? Type /skills, /experience, or /projects.");
+      addMessage("bot", "What would you like to know? Try asking about <em>skills</em>, <em>projects</em>, or <em>experience</em>.");
     }, 800);
   }, 400);
 }
@@ -54,12 +55,31 @@ function sendMessage() {
 
   addMessage("user", msg);
   $("#chatInput").val("");
-  showTyping();
 
-  setTimeout(() => {
-    handleCommand(msg.toLowerCase());
-    hideTyping();
-  }, 1000);
+  showTyping(); // Show typing immediately
+  handleCommand(msg.toLowerCase());
+}
+
+function handleCommand(input) {
+  $.ajax({
+    url: "http://localhost:5000/chat",
+    method: "POST",
+    contentType: "application/json",
+    data: JSON.stringify({ message: input }),
+    success: function (response) {
+      // Delay to mimic typing effect
+      setTimeout(() => {
+        hideTyping();
+        addMessage("bot", response.reply || "🤖 Hmm, I didn’t catch that. Try asking again?");
+      }, 1000);
+    },
+    error: function () {
+      setTimeout(() => {
+        hideTyping();
+        addMessage("bot", "⚠️ I'm having trouble thinking right now. Please try again later.");
+      }, 1000);
+    }
+  });
 }
 
 function addMessage(sender, text) {
@@ -86,7 +106,6 @@ function showTyping() {
       Vivek is typing<span class="dot">.</span><span class="dot">.</span><span class="dot">.</span>
     </div>
   `);
-
   $("#chatBox").append(typing);
   $("#chatBox").scrollTop($("#chatBox")[0].scrollHeight);
 }
@@ -95,27 +114,10 @@ function hideTyping() {
   $("#typing").remove();
 }
 
-function handleCommand(input) {
-  // Always send input to OpenAI for smart replies
-  $.ajax({
-    url: "http://localhost:5000/chat",
-    method: "POST",
-    contentType: "application/json",
-    data: JSON.stringify({ message: input }),
-    success: function (response) {
-      hideTyping();
-      addMessage("bot", response.reply);
-    },
-    error: function () {
-      hideTyping();
-      addMessage("bot", "⚠️ I'm having trouble thinking right now. Please try again later.");
-    }
-  });
-}
-// Send message on Enter key
+// 🔑 Press "Enter" to send message
 $("#chatInput").on("keypress", function (e) {
   if (e.which === 13 && !e.shiftKey) {
     sendMessage();
-    return false; // Prevent line break
+    return false;
   }
 });
