@@ -1,0 +1,73 @@
+{
+  "name": "Vivek Patel",
+  "title": "Shopify Developer",
+  "contact": {
+    "email": "vikupatel2001@gmail.com",
+    "phone": "8658458987",
+    "location": "Ahmedabad, Gujarat",
+    "linkedin": "https://www.linkedin.com/in/vivek-patel-shopify14082001/",
+    "github": "https://github.com/vvk14",
+    "portfolio": "https://www.babyorgano.com/"
+  },
+  "birthday": "14 August 2001",
+  "summary": "Skilled Shopify Developer with a strong background in theme customization, performance optimization, and responsive frontend development. Known for delivering innovative, high-quality e-commerce solutions.",
+  "skills": [
+    "HTML", "CSS", "JavaScript", "jQuery", "Liquid", "GitHub", "Figma",
+    "Shopify", "Shopify CLI", "Slack", "Asana", "Trello"
+  ],
+  "experience": [
+    {
+      "role": "Shopify Developer",
+      "company": "BabyOrgano",
+      "duration": "Oct 2024 – Present",
+      "location": "Ahmedabad",
+      "responsibilities": [
+        "Maintain and optimize Shopify website for performance and UX",
+        "Develop and troubleshoot custom themes aligning with brand identity",
+        "Implement SEO and speed optimizations",
+        "Manage product inventory and updates",
+        "Collaborate with marketing/design/product teams"
+      ]
+    },
+    {
+      "role": "Shopify Frontend Developer",
+      "company": "Alian Software",
+      "duration": "Oct 2022 – Aug 2024",
+      "location": "Anand",
+      "responsibilities": [
+        "Customized Shopify Dawn theme",
+        "Built custom sections using schema settings",
+        "Worked with metafields, product templates, and jQuery",
+        "Optimized stores for speed and mobile UX",
+        "Handled client communication and third-party app integrations"
+      ]
+    }
+  ],
+  "projects": [
+    {
+      "name": "Missionary to Madame",
+      "client": "M2M",
+      "date": "Dec 2023",
+      "description": "Adult Australian DTC e-commerce site. Customized and migrated Shopify Dawn theme, built tailored templates, and optimized site UX and responsiveness.",
+      "url": "https://missionarytomadame.com.au"
+    },
+    {
+      "name": "Habibi NY",
+      "client": "DTC Garage",
+      "date": "Feb 2024 – Apr 2024",
+      "description": "Contributed to site development and customization for a premium brand. Focused on responsive design and client feature requirements."
+    }
+  ],
+  "certifications": [
+    {
+      "name": "LinkedIn Skill Assessment",
+      "skills": ["HTML", "CSS"]
+    }
+  ],
+  "education": {
+    "degree": "BSc in Computer Science",
+    "university": "Sambalpur University",
+    "duration": "2019 – 2022",
+    "location": "Sambalpur, India"
+  }
+}
