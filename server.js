@@ -1,3 +1,5 @@
+require("dotenv").config(); // Load environment variables
+
 const express = require("express");
 const axios = require("axios");
 const cors = require("cors");
@@ -7,24 +9,22 @@ const fs = require("fs");
 const app = express();
 const PORT = 5000;
 
+// Use the API key from the .env file
+const OPENROUTER_API_KEY = process.env.OPENROUTER_API_KEY;
+
 // Static file hosting
 app.use(express.static(path.join(__dirname, "public")));
 app.use(cors());
 app.use(express.json());
 
-// 🔑 Your OpenRouter API Key
-const OPENROUTER_API_KEY = "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";
-
-// 🧠 Load resume data from JSON
+// Load resume data from JSON
 const resume = JSON.parse(fs.readFileSync(path.join(__dirname, "resumeData.json"), "utf-8"));
 
 app.post("/chat", async (req, res) => {
   const userMessage = req.body.message?.trim();
 
-  // ✅ Handle resume download request (before sending to AI)
   const commands = userMessage.toLowerCase();
 
-  // 🎯 Strong system prompt — AI uses only the resume
   const systemPrompt = `
   You are ResumeBot, an AI assistant trained exclusively on Vivek Patel's resume JSON. Your job is to respond accurately, briefly, and only based on the data provided.
 
@@ -47,7 +47,7 @@ app.post("/chat", async (req, res) => {
 
   💼 <strong>Experience:</strong>
   ${resume.experience.map(exp => 
-    `• ${exp.role} at ${exp.company} (${exp.duration}): ${exp.responsibilities.join("; ")}`
+    `• ${exp.role} at ${exp.company} (${exp.duration}): ${exp.responsibilities.join("; ")}`  
   ).join("\n")}
 
   📁 <strong>Projects:</strong>
@@ -67,13 +67,11 @@ app.post("/chat", async (req, res) => {
   ✅ Respond professionally and conversationally. Keep each reply focused only on what was asked.
   `;
 
-
-
   try {
     const response = await axios.post(
       "https://openrouter.ai/api/v1/chat/completions",
       {
-        model: "mistralai/mistral-7b-instruct", // fast, free, and OpenRouter-supported
+        model: "mistralai/mistral-7b-instruct",
         messages: [
           { role: "system", content: systemPrompt },
           { role: "user", content: userMessage }
@@ -100,7 +98,9 @@ app.post("/chat", async (req, res) => {
   }
 });
 
-// 🚀 Start server
+// Start server
 app.listen(PORT, () => {
   console.log(`✅ Server running at http://localhost:${PORT}`);
 });
+
+console.log("🔑 Loaded API Key:", process.env.OPENROUTER_API_KEY);
