@@ -31,7 +31,7 @@ app.post("/chat", async (req, res) => {
   📌 Rules:
   - DO NOT guess or fabricate any info.
   - DO NOT repeat the entire resume unless asked.
-  - DO NOT add sections the user didn’t ask for (like projects if they only asked about education).
+  - DO NOT add sections the user didn't ask for (like projects if they only asked about education).
   - If someone asks for something not in the resume, politely decline.
   - Use <strong> and <mark> for styling important text.
   - For links (LinkedIn, GitHub, portfolio), use clean clickable anchor tags.
@@ -67,6 +67,61 @@ app.post("/chat", async (req, res) => {
   ✅ Respond professionally and conversationally. Keep each reply focused only on what was asked.
   `;
 
+  // Helper function to generate fallback responses based on user input
+  function generateFallbackResponse(message) {
+    const lowerMsg = message.toLowerCase();
+    
+    if (lowerMsg.includes('skill') || lowerMsg.includes('tech') || lowerMsg.includes('language')) {
+      return `🛠 <strong>My Skills:</strong><br/><mark>${resume.skills.join(", ")}</mark><br/><br/>I'm proficient in these technologies and always learning new ones!`;
+    }
+    
+    if (lowerMsg.includes('education') || lowerMsg.includes('degree') || lowerMsg.includes('study') || lowerMsg.includes('university')) {
+      return `🎓 <strong>Education:</strong><br/>${resume.education.degree}<br/>${resume.education.university}<br/><mark>${resume.education.duration}</mark>`;
+    }
+    
+    if (lowerMsg.includes('experience') || lowerMsg.includes('work') || lowerMsg.includes('job') || lowerMsg.includes('career')) {
+      const expList = resume.experience.map(exp => 
+        `<strong>${exp.role}</strong> at <mark>${exp.company}</mark> (${exp.duration})<br/>• ${exp.responsibilities.join("<br/>• ")}`
+      ).join("<br/><br/>");
+      return `💼 <strong>My Experience:</strong><br/><br/>${expList}`;
+    }
+    
+    if (lowerMsg.includes('project') || lowerMsg.includes('portfolio') || lowerMsg.includes('build') || lowerMsg.includes('develop')) {
+      const projList = resume.projects.map(p =>
+        `<strong>${p.name}</strong> (${p.date})<br/>${p.description}${p.url ? `<br/><a href="${p.url}" target="_blank">🔗 View Project</a>` : ""}`
+      ).join("<br/><br/>");
+      return `📁 <strong>My Projects:</strong><br/><br/>${projList}`;
+    }
+    
+    if (lowerMsg.includes('contact') || lowerMsg.includes('email') || lowerMsg.includes('phone') || lowerMsg.includes('reach')) {
+      return `📬 <strong>Contact Information:</strong><br/>
+        📧 Email: <a href="mailto:vikupatel2001@gmail.com">vikupatel2001@gmail.com</a><br/>
+        📱 Phone: <mark>+91 8658458987</mark><br/>
+        💼 LinkedIn: <a href="https://linkedin.com/in/vivek-patel-shopify14082001" target="_blank">LinkedIn Profile</a><br/>
+        💻 GitHub: <a href="https://github.com/vvk14" target="_blank">GitHub Profile</a><br/>
+        🌐 Portfolio: <a href="https://www.babyorgano.com" target="_blank">Portfolio Website</a>`;
+    }
+    
+    if (lowerMsg.includes('resume') || lowerMsg.includes('download') || lowerMsg.includes('cv')) {
+      return `📄 You can download my resume here:<br/><a href="/resume/vivek_resume.pdf" download><button style="background: #007bff; color: white; border: none; padding: 8px 16px; border-radius: 4px; cursor: pointer;">⬇️ Download Resume</button></a>`;
+    }
+    
+    if (lowerMsg.includes('hello') || lowerMsg.includes('hi') || lowerMsg.includes('hey')) {
+      return `👋 Hello! I'm <strong>Vivek Patel</strong>, a passionate developer. What would you like to know about me? You can ask about my <mark>skills</mark>, <mark>experience</mark>, <mark>projects</mark>, or <mark>education</mark>!`;
+    }
+    
+    return `🤖 Hi! I'm Vivek's AI assistant. I can help you learn about:<br/>
+      • 🛠 <strong>Skills & Technologies</strong><br/>
+      • 💼 <strong>Work Experience</strong><br/>
+      • 📁 <strong>Projects</strong><br/>
+      • 🎓 <strong>Education</strong><br/>
+      • 📬 <strong>Contact Information</strong><br/><br/>
+      What would you like to know?`;
+  }
+
+  console.log("🔑 Using API Key:", OPENROUTER_API_KEY?.substring(0, 20) + "...");
+  console.log("📝 User Message:", userMessage);
+
   try {
     const response = await axios.post(
       "https://openrouter.ai/api/v1/chat/completions",
@@ -83,18 +138,25 @@ app.post("/chat", async (req, res) => {
           "HTTP-Referer": "http://localhost:5000",
           "X-Title": "VivekResumeBot",
           "Content-Type": "application/json"
-        }
+        },
+        timeout: 10000 // 10 second timeout
       }
     );
 
+    console.log("✅ OpenRouter API Response Status:", response.status);
     const reply = response.data.choices[0].message.content;
     res.json({ reply });
 
   } catch (error) {
-    console.error("OpenRouter API Error:", error.response?.data || error.message);
-    res.status(500).json({
-      reply: "⚠️ I'm having trouble thinking right now. Please try again later."
-    });
+    console.error("❌ OpenRouter API Error:");
+    console.error("Status:", error.response?.status);
+    console.error("Data:", error.response?.data);
+    console.error("Full error:", error.message);
+    
+    // Use fallback response instead of generic error
+    console.log("🔄 Using fallback response system...");
+    const fallbackReply = generateFallbackResponse(userMessage);
+    res.json({ reply: fallbackReply });
   }
 });
 
