@@ -67,6 +67,15 @@ app.post("/chat", async (req, res) => {
   ✅ Respond professionally and conversationally. Keep each reply focused only on what was asked.
   `;
 
+  console.log("🔑 Using API Key:", OPENROUTER_API_KEY?.substring(0, 20) + "...");
+  console.log("📝 Request payload:", {
+    model: "mistralai/mistral-7b-instruct",
+    messages: [
+      { role: "system", content: systemPrompt.substring(0, 100) + "..." },
+      { role: "user", content: userMessage }
+    ]
+  });
+
   try {
     const response = await axios.post(
       "https://openrouter.ai/api/v1/chat/completions",
@@ -87,11 +96,15 @@ app.post("/chat", async (req, res) => {
       }
     );
 
+    console.log("✅ OpenRouter API Response Status:", response.status);
     const reply = response.data.choices[0].message.content;
     res.json({ reply });
 
   } catch (error) {
-    console.error("OpenRouter API Error:", error.response?.data || error.message);
+    console.error("❌ OpenRouter API Error:");
+    console.error("Status:", error.response?.status);
+    console.error("Data:", error.response?.data);
+    console.error("Full error:", error.message);
     res.status(500).json({
       reply: "⚠️ I'm having trouble thinking right now. Please try again later."
     });
