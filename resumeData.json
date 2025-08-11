@@ -64,6 +64,12 @@
       "skills": ["HTML", "CSS"]
     }
   ],
+  "birthplace": {
+    "city": "Barpali",
+    "district": "Bargarh",
+    "state": "Odisha",
+    "country": "India"
+  },
   "education": {
     "degree": "BSc in Computer Science",
     "university": "Sambalpur University",

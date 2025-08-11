@@ -1,4 +1,4 @@
-require("dotenv").config(); // Load environment variables
+require("dotenv").config();
 
 const express = require("express");
 const axios = require("axios");
@@ -8,79 +8,68 @@ const fs = require("fs");
 
 const app = express();
 const PORT = 5000;
-
-// Use the API key from the .env file
 const OPENROUTER_API_KEY = process.env.OPENROUTER_API_KEY;
 
-// Static file hosting
 app.use(express.static(path.join(__dirname, "public")));
 app.use(cors());
 app.use(express.json());
 
-// Load resume data from JSON
+// Load resume data
 const resume = JSON.parse(fs.readFileSync(path.join(__dirname, "resumeData.json"), "utf-8"));
 
 app.post("/chat", async (req, res) => {
   const userMessage = req.body.message?.trim();
+  const lowerMsg = userMessage.toLowerCase();
 
-  const commands = userMessage.toLowerCase();
+  // Detect if the message is career/resume related
+  const careerKeywords = [
+    "skill",
+    "experience",
+    "project",
+    "education",
+    "resume",
+    "job",
+    "shopify",
+    "developer",
+    "work",
+    "portfolio",
+    "contact",
+    "linkedin",
+    "dob",
+    "date of birth",
+    "born",
+    "birthplace",
+    "place of birth",
+    "github"
+  ];
+  const isCareerRelated = careerKeywords.some(word => lowerMsg.includes(word));
 
-  const systemPrompt = `
-  You are ResumeBot, an AI assistant trained exclusively on Vivek Patel's resume JSON. Your job is to respond accurately, briefly, and only based on the data provided.
+  let systemPrompt;
 
-  📌 Rules:
-  - DO NOT guess or fabricate any info.
-  - DO NOT repeat the entire resume unless asked.
-  - DO NOT add sections the user didn’t ask for (like projects if they only asked about education).
-  - If someone asks for something not in the resume, politely decline.
-  - Use <strong> and <mark> for styling important text.
-  - For links (LinkedIn, GitHub, portfolio), use clean clickable anchor tags.
-  - For the resume download, say:
-    "📄 You can download my resume here" and include the button in this format:
-    <a href="/resume/vivek_resume.pdf" download><button>⬇️ Download Resume</button></a>
+  if (isCareerRelated) {
+    // If related to career → inject resume JSON
+    systemPrompt = `
+You are Vivek Patel, speaking naturally as yourself.
+You are friendly, conversational, and professional.
+The user is asking about your career or background, so use this resume info to answer:
 
-  ---
+${JSON.stringify(resume, null, 2)}
 
-  🎓 <strong>Education:</strong> ${resume.education.degree}, ${resume.education.university} (${resume.education.duration})
-
-  🛠 <strong>Skills:</strong> ${resume.skills.join(", ")}
-
-  💼 <strong>Experience:</strong>
-  ${resume.experience.map(exp => 
-    `• ${exp.role} at ${exp.company} (${exp.duration}): ${exp.responsibilities.join("; ")}`  
-  ).join("\n")}
-
-  📁 <strong>Projects:</strong>
-  ${resume.projects.map(p =>
-    `• ${p.name} (${p.date}): ${p.description}${p.url ? " – " + p.url : ""}`
-  ).join("\n")}
-
-  📬 <strong>Contact:</strong>
-  Email: vikupatel2001@gmail.com  
-  Phone: +91 8658458987  
-  LinkedIn: https://linkedin.com/in/vivek-patel-shopify14082001  
-  GitHub: https://github.com/vvk14  
-  Portfolio: https://www.babyorgano.com
-
-  🎂 <strong>Birthday:</strong> 14 August 2001
-
-  ✅ Respond professionally and conversationally. Keep each reply focused only on what was asked.
-  `;
-
-  console.log("🔑 Using API Key:", OPENROUTER_API_KEY?.substring(0, 20) + "...");
-  console.log("📝 Request payload:", {
-    model: "mistralai/mistral-7b-instruct",
-    messages: [
-      { role: "system", content: systemPrompt.substring(0, 100) + "..." },
-      { role: "user", content: userMessage }
-    ]
-  });
+Only answer the specific question. Do not dump the entire resume unless the user specifically asks for "full resume".
+    `;
+  } else {
+    // If small talk or general conversation → no resume
+    systemPrompt = `
+You are Vivek Patel, speaking naturally like a human in casual conversation.
+Do not bring up career details unless the user asks about them.
+    `;
+  }
 
   try {
     const response = await axios.post(
       "https://openrouter.ai/api/v1/chat/completions",
       {
-        model: "mistralai/mistral-7b-instruct",
+        model: "mistralai/mistral-7b-instruct", // You can change to a better conversational model
         messages: [
           { role: "system", content: systemPrompt },
           { role: "user", content: userMessage }
@@ -89,22 +78,16 @@ app.post("/chat", async (req, res) => {
       {
         headers: {
           Authorization: `Bearer ${OPENROUTER_API_KEY}`,
-          "HTTP-Referer": "http://localhost:5000",
-          "X-Title": "VivekResumeBot",
           "Content-Type": "application/json"
         }
       }
     );
 
-    console.log("✅ OpenRouter API Response Status:", response.status);
-    const reply = response.data.choices[0].message.content;
+    const reply = response.data.choices[0].message.content.trim();
     res.json({ reply });
 
   } catch (error) {
-    console.error("❌ OpenRouter API Error:");
-    console.error("Status:", error.response?.status);
-    console.error("Data:", error.response?.data);
-    console.error("Full error:", error.message);
+    console.error("❌ OpenRouter API Error:", error.message);
     res.status(500).json({
       reply: "⚠️ I'm having trouble thinking right now. Please try again later."
     });
@@ -115,5 +98,3 @@ app.post("/chat", async (req, res) => {
 app.listen(PORT, () => {
   console.log(`✅ Server running at http://localhost:${PORT}`);
 });
-
-console.log("🔑 Loaded API Key:", process.env.OPENROUTER_API_KEY);
